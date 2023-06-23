@@ -1,0 +1,578 @@
+<!-- You must include this JavaScript file -->
+<script src="https://assets.crowd.aws/crowd-html-elements.js"></script>
+
+<!-- For the full list of available Crowd HTML Elements and their input/output documentation,
+      please refer to https://docs.aws.amazon.com/sagemaker/latest/dg/sms-ui-template-reference.html -->
+
+<!-- Instructions -->
+<div class="row">
+    <div class="col-xs-12 col-md-12">
+        <div class="panel panel-primary">
+            <!-- WARNING: the ids "collapseTrigger" and "instructionBody" are being used to enable expand/collapse feature -->
+            <a class="panel-heading" href="javascript:void(0);" id="collapseTrigger">
+                <strong>Detailed Instructions</strong>
+                <span class="collapse-text">(Click to expand)</span>
+            </a>
+            <div class="panel-body" id="instructionBody">
+                <p>In this task, you will compare two recipes for the same dish and ingredients.</p>
+                <p>The ingredients will apear on the left. The first recipe, Recipe A, will appear all at once in the
+                    middle of the screen. The second recipe, Recipe B, will appear step by step on the right.</p>
+                <p>For each step in Recipe B, check if it appears in Recipe A. A step in Recipe B can appear in Recipe A
+                    as its own step or part of another step. If the current step in Recipe B mentions amounts of
+                    ingredients, make the amounts are correct according to the ingredients list. If the current step of
+                    Recipe B appears in Recipe A, answer question (a) with "Yes."</p>
+                <p>If the current step in Recipe B does not appear in Recipe A, hit "No" for question (a). Then use your
+                    judgment to decide if this new step is a valid step for the dish and ingredients. A step is valid if
+                    you would reasonably expect to do it while cooking this dish with the listed ingredients. If you
+                    consider the step valid, hit "Yes" for question (b).</p>
+                <p>If the current step in Recipe B is not valid, hit "No" for question (b). Then mark why you consider
+                    the step invalid using the checkboxes that appear after hitting "No." Hit "Next" to continue to the
+                    next step.</p>
+                <p>After you have gone through all of the steps, you will answer questions about the two recipes as a
+                    whole. First, indicate how familiar you are with the dish on a scale of 1 to 5. Then mark if any
+                    steps or parts of steps from Recipe A are missing in Recipe B using the checkboxes. Lastly, mark
+                    which of the two recipes you would prefer to cook if you were to follow one for this dish.
+                    Optionally explain your thoughts in the text box before moving on to the next HIT.</p>
+                <p>Click "More Instructions" below for an example.</p>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Instructions -->
+
+<!-- Example -->
+<div class="row">
+    <div class="col-xs-12 col-md-12">
+        <div class="panel panel-primary">
+            <!-- WARNING: the ids "collapseTrigger2" and "exampleBody" are being used to enable expand/collapse feature -->
+            <a class="panel-heading" href="javascript:void(0);" id="collapseTrigger2">
+                <strong>Example Annotations</strong>
+                <span class="collapse-text2">(Click to expand)</span>
+            </a>
+            <div class="panel-body" id="exampleBody">
+                <p>Here are the ingredients for "White Bean & Veggie Salad":</p>
+                <ul>
+                    <li>2 cups mixed salad greens</li>
+                    <li>3/4 cup veggies of your choice, such as chopped cucumbers and cherry tomatoes</li>
+                    <li>1/3 cup canned white beans, rinsed and drained</li>
+                    <li>1/2 avocado, diced</li>
+                    <li>1 tablespoon red-wine vinegar</li>
+                    <li>2 teaspoons extra-virgin olive oil</li>
+                    <li>1/4 teaspoon kosher salt</li>
+                    <li>Freshly ground pepper to taste</li>
+                </ul>
+                <p>Recipe A has three steps:</p>
+                <ol>
+                    <li>Combine greens, veggies, beans and avocado in a medium bowl.</li>
+                    <li>Drizzle with vinegar and oil and season with salt and pepper.</li>
+                    <li>Toss to combine and transfer to a large plate.</li>
+                </ol>
+                <p>Let's say that Recipe B has a few steps:</p>
+                <ol>
+                    <li>Combine the greens veggies and beans in a medium bowl.</li>
+                    <ul>
+                        <li>We would say that this step is part of step 1 in recipe A.</li>
+                    </ul>
+                    <li>Add one sliced avocado to the bowl.</li>
+                    <ul>
+                        <li>We would say this is <it>not</it> in Recipe A because the avocado amount is wrong (one vs.
+                            1/2) and the preparation is wrong (sliced vs. diced).</li>
+                    </ul>
+                    <li>Drizzle with vinegar and oil and season with salt and pepper.</li>
+                    <ul>
+                        <li>This step is the same as step 2 in Recipe A, so we would say it is in Recipe A.</li>
+                    </ul>
+                    <li>Use tongs to mix the dressing with the rest of the salad.</li>
+                    <ul>
+                        <li>This is different from "toss to combine" in step 3 of Recipe A, so we would say it is not in
+                            Recipe A. We think, however, that it would be reasonable to do this step when making a
+                            salad, so we would mark it as valid.</li>
+                    </ul>
+                </ol>
+                <p>Now that all steps of Recipe B have been shown, we would say that part of step 3 from Recipe A
+                    ("transfer to a large plate") is missing in Recipe B. We will let you choose your familiarity and
+                    overall preference based on your experience.</p>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Example -->
+
+<!-- You must include crowd-form so that your task submits answers to MTurk -->
+<crowd-form answer-format="flatten-objects">
+
+    <crowd-input name="title" value="${title}" style="display: none"></crowd-input>
+    <crowd-input name="id" value="${id}" style="display: none"></crowd-input>
+    <crowd-input name="which-static-recipe" value="${which_static_recipe}" style="display: none"></crowd-input>
+
+    <h3 style="text-align: center; color: green;">Click the panels above for more information. This is very important to
+        ensure the HIT is done correctly.</h3>
+
+    <h1 style="text-align: center;">Evaluate the following recipes for ${title}.</h1>
+
+    <div id="hit-area" style="display: flex; position: relative;">
+        <div id="ingredients-area" style="width: 20%; /* border-style: solid; */">
+            <h2>Ingredients</h2>
+            <div id="ingredients-list"></div>
+        </div>
+        <div id="static-recipe-area" style="width: 40%; /* border-style: solid; */">
+            <h2>Recipe A</h2>
+            <div id="static-steps-area"></div>
+        </div>
+        <div id="dynamic-recipe-area" style="width: 40%; /* border-style: solid; */">
+            <h2>Recipe B</h2>
+            <div id="steps-area"></div>
+            <button id="next" onclick="showNextStep();" type="button">Next</button>
+        </div>
+    </div>
+
+
+</crowd-form>
+
+<script>
+    var static_recipe = ${ recipe_a };
+    var steps = ['${step_0}', '${step_1}', '${step_2}', '${step_3}', '${step_4}',
+        '${step_5}', '${step_6}', '${step_7}', '${step_8}', '${step_9}',
+        '${step_10}', '${step_11}', '${step_12}', '${step_13}',
+        '${step_14}', '${step_15}', '${step_16}', '${step_17}'];
+    var currentStep = 0;
+    var isLastStepVisible = false;
+
+    function showOrHideQuestion(button) {
+        q_num = button.id.split("_")[1];
+        questionBlockTemp = document.getElementById("question_" + q_num);
+
+        if (button.innerHTML == "Hide") {
+            questionBlockTemp.style.display = "none";
+            button.innerHTML = "Show";
+        }
+        else {
+            questionBlockTemp.style.display = "block";
+            button.innerHTML = "Hide";
+        }
+    }
+
+    function showNextStep() {
+        questionBlock = document.createElement("div");
+        annotations = document.createElement("div");
+
+        if (currentStep < ${ num_steps }) {
+            if (currentStep > 0) {
+                prev = document.getElementById("question_" + (currentStep - 1));
+                prev.style.display = "none";
+                prevButton = document.getElementById("show-hide_" + (currentStep - 1));
+                prevButton.innerHTML = "Show";
+            }
+            questionBlock.innerHTML = "<p>" + steps[currentStep] + "\t</p>";
+            showHideButton = document.createElement("button");
+            showHideButton.id = "show-hide_" + currentStep;
+            showHideButton.innerHTML = "Hide";
+            showHideButton.type = "button";
+            showHideButton.setAttribute("onclick", "showOrHideQuestion(this);");
+
+            questionBlock.children[0].appendChild(showHideButton);
+
+            annotations.setAttribute("id", "question_" + currentStep);
+            addQuestions(annotations);
+
+            currentStep += 1;
+        }
+        else {
+            if (!isLastStepVisible) {
+                familiarity = document.createElement("div");
+                familiarity.innerHTML = "<p>How familiar are you with this recipe?</p><div style='display: flex; justify-content: center;'>Not at all familiar <crowd-slider name='familiarity' min='1' max='5'  value='-1' pin editable required></crowd-slider> Very Familiar</div>";
+
+                missing = document.createElement("div");
+                missing.innerHTML = "<p>Select the steps from Recipe A that are missing in Recipe B, if any.</p>";
+                missing.style.display = "flex";
+                missing.style.flexDirection = "column";
+
+                for (let i = 0; i < ${ recipe_a }.length; i++) {
+                    missingCheckbox = createCrowdElement("crowd-checkbox", { "name": "missing_" + i }, i + 1);
+                    missingCheckbox.style.marginLeft = "50";
+                    missing.appendChild(missingCheckbox);
+                }
+
+                missingCheckbox = createCrowdElement("crowd-checkbox", { "name": "missing_none" }, "None");
+                missingCheckbox.style.marginLeft = "50";
+                missing.appendChild(missingCheckbox);
+
+                prefer = document.createElement("crowd-radio-group");
+                prefer.innerHTML = "Which recipe do you prefer?";
+                preferA = document.createElement("crowd-radio-button");
+                preferA.setAttribute("name", "preferA");
+                preferA.setAttribute("value", "A");
+                preferA.innerHTML = "A";
+                preferB = document.createElement("crowd-radio-button");
+                preferB.setAttribute("name", "preferB");
+                preferB.setAttribute("value", "B");
+                preferB.innerHTML = "B";
+                preferN = document.createElement("crowd-radio-button");
+                preferN.setAttribute("name", "preferN");
+                preferN.setAttribute("value", "N");
+                preferN.innerHTML = "Neither";
+                prefer.appendChild(preferA);
+                prefer.appendChild(preferB);
+                prefer.appendChild(preferN);
+
+                noOtherComment = document.createElement("crowd-input");
+                noOtherComment.setAttribute("name", "no-other-comment_" + currentStep);
+                noOtherComment.setAttribute("label", "Comments (optional)");
+
+                annotations.appendChild(document.createElement("hr"));
+                annotations.appendChild(familiarity);
+                annotations.appendChild(missing);
+                annotations.appendChild(prefer);
+                annotations.appendChild(noOtherComment);
+
+                isLastStepVisible = true;
+            }
+        }
+
+        questionBlock.appendChild(annotations);
+        stepsArea = document.getElementById("steps-area");
+        stepsArea.appendChild(questionBlock);
+    }
+
+    function handleStepOptions(question) {
+        q_num = question.name.split("_")[1];
+        notIncluded = document.getElementById("not-included_" + q_num);
+
+        if (question.value == "no") {
+            notIncluded.style.visibility = "visible";
+            notIncluded.style.display = "block";
+        }
+        else {
+            notIncluded.style.display = "none";
+
+            for (const child of notIncluded.children[0].children) {
+                if (child.tagName.toLowerCase() == "crowd-radio-button") {
+                    child.checked = false;
+                }
+            }
+
+            notValid = document.getElementById("not-valid_" + q_num);
+            notValid.style.display = "none";
+        }
+    }
+
+    function handleInvalidOptions(question) {
+        q_num = question.name.split("_")[1];
+        notValid = document.getElementById("not-valid_" + q_num);
+
+        if (question.value == "no") {
+            notValid.style.visibility = "visible";
+            notValid.style.display = "flex";
+            notValid.style.flexDirection = "column";
+        }
+        else {
+            notValid.style.display = "none";
+
+            for (const child of notValid.children) {
+                if (child.tagName.toLowerCase() == "crowd-checkbox") {
+                    child.checked = false;
+                }
+            }
+
+            notValidInput = document.getElementById("valid-other-text_" + q_num);
+            notValidInput.value = "";
+        }
+    }
+
+    function showOtherInput(question) {
+        q_num = question.name.split("_")[1];
+        otherInput = document.getElementById("valid-other-text_" + q_num);
+
+        if (question.checked) {
+            otherInput.style.visibility = "visible";
+            otherInput.style.display = "block";
+        }
+        else {
+            otherInput.style.display = "none";
+            otherInput.value = "";
+        }
+
+    }
+
+    function createStepOption(elementType, name, innerHTML) {
+        stepOption = document.createElement(elementType);
+        stepOption.name = name;
+        stepOption.style.display = "block";
+        stepOption.innerHTML = innerHTML;
+        stepOption.setAttribute("value", "yes");
+
+        return stepOption;
+    }
+
+    function addQuestions(annotations) {
+        addInclusionQuestion(annotations);
+    }
+
+    function createCrowdElement(crowdElementType, attribute2value, innerHTML) {
+        var element = document.createElement(crowdElementType);
+
+        for (let key in attribute2value) {
+            element.setAttribute(key, attribute2value[key]);
+        }
+
+        if (innerHTML !== null) {
+            element.innerHTML = innerHTML;
+        }
+
+        return element;
+    }
+
+    function addInclusionQuestion(annotations) {
+        // First question: Is this step in or part of a step in Recipe A?
+        questionArea = document.createElement("crowd-radio-group");
+        questionArea.innerHTML = "Is this step in or part of a step in Recipe A?";
+        questionArea.className = "inclusion";
+        questionArea.id = "inclusion_" + currentStep;
+        yes = createCrowdElement("crowd-radio-button", { "name": "inclusion-yes_" + currentStep, "onclick": "handleStepOptions(this);" }, "Yes");
+        no = createCrowdElement("crowd-radio-button", { "name": "inclusion-no_" + currentStep, "onclick": "handleStepOptions(this);", "value": "no" }, "No");
+
+        // If no: Is this a valid step for this recipe?
+        notIncluded = document.createElement("div");
+        notIncluded.innerHTML = "Is this a valid step for this recipe?";
+        notIncluded.setAttribute("id", "not-included_" + currentStep);
+        validArea = document.createElement("crowd-radio-group");
+        validArea.id = "not-included-radio-group_" + currentStep;
+        valid = createCrowdElement("crowd-radio-button", { "name": "valid-yes_" + currentStep, "onclick": "handleInvalidOptions(this);" }, "Yes");
+        invalid = createCrowdElement("crowd-radio-button", { "name": "valid-no_" + currentStep, "value": "no", "onclick": "handleInvalidOptions(this);" }, "No");
+
+        // If no again: Why?
+        notValid = document.createElement("div");
+        notValid.setAttribute("id", "not-valid_" + currentStep);
+        notValid.innerHTML = "Why is this step not valid?";
+        badIngredient = createCrowdElement("crowd-checkbox", { "name": "bad-ingredient_" + currentStep }, "Invalid ingredient or amount of ingredient");
+        badAction = createCrowdElement("crowd-checkbox", { "name": "bad-action_" + currentStep }, "Invalid action");
+        other = createCrowdElement("crowd-checkbox", { "name": "valid-other_" + currentStep, "onclick": "showOtherInput(this);" }, "Other");
+        otherInput = createCrowdElement("crowd-input", { "name": "valid-other-text_" + currentStep, "label": "Reason", "id": "valid-other-text_" + currentStep }, null);
+        otherInput.style.display = "none";
+
+        // Add everything to DOM tree
+        for (let e of [badIngredient, badAction, other, otherInput]) {
+            notValid.appendChild(e);
+        }
+        notValid.style.display = "none";
+
+        for (let e of [valid, invalid]) {
+            validArea.appendChild(e);
+        }
+        notIncluded.appendChild(validArea);
+        notIncluded.style.display = "none";
+
+        for (let e of [yes, no]) {
+            questionArea.appendChild(e);
+        }
+
+        for (let e of [questionArea, notIncluded, notValid]) {
+            annotations.appendChild(e);
+        }
+    }
+
+    function addRecipeA() {
+        staticStepsArea = document.getElementById("static-steps-area");
+        staticStepsArea.innerHTML = "";
+
+        for (let i = 0; i < ${ recipe_a }.length; i++) {
+            staticStepsArea.innerHTML += "<li>" + ${ recipe_a } [i] + "</li>";
+        }
+
+        staticStepsArea.innerHTML = "<ol>" + staticStepsArea.innerHTML + "</ol>";
+
+        recipeArea = document.getElementById("static-recipe-area");
+        recipeArea.appendChild(staticStepsArea);
+    }
+
+    function addIngredients() {
+        ingredientsList = document.getElementById("ingredients-list");
+        ingredientsList.innerHTML = "";
+
+        for (let i = 0; i < ${ ingredients }.length; i++) {
+            ingredientsList.innerHTML += "<li>" + ${ ingredients } [i] + "</li>";
+        }
+
+        ingredientsList.innerHTML = "<ul>" + ingredientsList.innerHTML + "</ul>";
+
+        ingredientsArea = document.getElementById("ingredients-area");
+        ingredientsArea.appendChild(ingredientsList);
+    }
+
+    function validateForm() {
+        let valid = true;
+        let errorQuestions = [];
+        let inclusionQuestions = document.querySelectorAll(".inclusion");
+
+        // Go through all top-level questions
+        for (let q of inclusionQuestions) {
+            let qNum = q.id.split("_")[1];
+
+            let validInclusionQuestions = false;
+            let validNotIncludedQuestions = false;
+            let validNotValidQuestions = false;
+
+            // Included: yes or no
+            for (let q_ of q.children) {
+                validInclusionQuestions = validInclusionQuestions || q_.checked;  // at least one yes/no option checked
+
+                // If "no" option...
+                if (q_.name.includes("inclusion-no_")) {
+                    // is checked...
+                    if (q_.checked) {
+                        let notIncludedQuestion = document.getElementById("not-included-radio-group_" + qNum);
+                        console.log("inside if: ", Number(qNum) + 1);
+
+                        // make sure they answer follow-up questions.
+                        for (let q__ of notIncludedQuestion.children) {
+                            validNotIncludedQuestions = validNotIncludedQuestions || q__.checked;
+
+                            // If "no" option...
+                            if (q__.name.includes("valid-no_")) {
+                                // is checked again...
+                                if (q__.checked) {
+                                    let notValidQuestion = document.getElementById("not-valid_" + qNum);
+
+                                    // make sure other follow-up questions are answered.
+                                    for (let q___ of notValidQuestion.children) {
+                                        validNotValidQuestions = validNotValidQuestions || q___.checked;
+                                    }
+                                }
+                                else {
+                                    validNotValidQuestions = true;
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        console.log("else: ", Number(qNum) + 1);
+                        validNotIncludedQuestions = true;
+                        validNotValidQuestions = true;
+                    }
+                }
+            }
+
+            // Submission is valid if all top-level questions and applicable follow-up questions are answered
+            valid = valid && validInclusionQuestions && validNotIncludedQuestions && validNotValidQuestions;
+
+            // If any one of these parts for the current question is invalid, add to list to help with error checking
+            if (!(validInclusionQuestions && validNotIncludedQuestions && validNotValidQuestions)) {
+                console.log(Number(qNum) + 1, validInclusionQuestions, validNotIncludedQuestions, validNotValidQuestions);
+                errorQuestions.push(Number(qNum) + 1);
+            }
+        }
+
+        return [valid, errorQuestions];
+    }
+
+    window.onload = function () {
+        document.querySelector('crowd-form').onsubmit = function (e) {
+            if (currentStep < ${ num_steps }) {
+                alert("Please click \"Next\" until you have viewed all steps in Recipe B. You will need to answer questions about your familiarity with the recipe, missing steps, and preference.");
+                e.preventDefault();
+            }
+            else {
+                let [valid, errorQs] = validateForm();
+
+                if (!valid) {
+                    alert("Please answer all the questions and applicable follow-up questions in order to submit. You should double check " + errorQs + ". Troubleshooting tip: if you answered \"No\" for any of the questions, make sure you answered the follow-up options.");
+                    e.preventDefault();
+                }
+            }
+        };
+
+        addRecipeA();
+        addIngredients();
+        showNextStep();
+    }
+</script>
+
+<!-- External JS references -->
+<script src="https://code.jquery.com/jquery-3.1.0.min.js"
+    integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"
+    integrity="sha384-s1ITto93iSMDxlp/79qhWHi+LsIi9Gx6yL+cOKDuymvihkfol83TYbLbOw+W/wv4"
+    crossorigin="anonymous"></script>
+<!-- Open internal javascript -->
+<script>
+    $(document).ready(function () {
+        // Instructions expand/collapse
+        var content = $('#instructionBody');
+        var trigger = $('#collapseTrigger');
+        content.hide();
+        $('.collapse-text').text('(Click to expand)');
+        trigger.click(function () {
+            content.toggle();
+            var isVisible = content.is(':visible');
+            if (isVisible) {
+                $('.collapse-text').text('(Click to collapse)');
+            } else {
+                $('.collapse-text').text('(Click to expand)');
+            }
+        });
+        // end expand/collapse
+    });
+
+    $(document).ready(function () {
+        // Examples expand/collapse
+        var content = $('#exampleBody');
+        var trigger = $('#collapseTrigger2');
+        content.hide();
+        $('.collapse-text2').text('(Click to expand)');
+        trigger.click(function () {
+            content.toggle();
+            var isVisible = content.is(':visible');
+            if (isVisible) {
+                $('.collapse-text2').text('(Click to collapse)');
+            } else {
+                $('.collapse-text2').text('(Click to expand)');
+            }
+        });
+        // end expand/collapse
+    });
+</script>
+
+<!-- Please note that Bootstrap CSS/JS and JQuery are 3rd party libraries that may update their url/code at any time. Amazon Mechanical Turk (MTurk) is including these libraries as a default option for you, but is not responsible for any changes to the external libraries -->
+<!-- External CSS references -->
+<link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css"
+    integrity="sha384-IS73LIqjtYesmURkDE9MXKbXqYA8rvKEp/ghicjem7Vc3mGRdQRptJSz60tvrB6+" rel="stylesheet" />
+<!-- Open internal style sheet -->
+<style type="text/css">
+    #collapseTrigger {
+        color: #fff;
+        display: block;
+        text-decoration: none;
+    }
+
+    #collapseTrigger2 {
+        color: #fff;
+        display: block;
+        text-decoration: none;
+    }
+
+    #submitButton {
+        white-space: normal;
+    }
+
+    .image {
+        margin-bottom: 15px;
+    }
+
+    /* CSS for breaking long words/urls */
+    .dont-break-out {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        -ms-word-break: break-all;
+        word-break: break-all;
+        word-break: break-word;
+        -ms-hyphens: auto;
+        -moz-hyphens: auto;
+        -webkit-hyphens: auto;
+        hyphens: auto;
+    }
+
+    blockquote p {
+        font-size: 14px !important;
+    }
+</style>
+<!-- Close internal style sheet -->
