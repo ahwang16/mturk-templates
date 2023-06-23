@@ -1,4 +1,4 @@
-# MTurk Templates
+# MTurk Templates for Complex Human Evaluation Tasks
 A collection of complex Amazon Mechanical Turk templates I created for my work. These templates are designed to make complex annotations tasks easier for human annotators to evaluate by breaking down each HIT into several subtasks. I will add templates and references here as I work on them.
 
 ## Compare Recipes
