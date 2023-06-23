@@ -4,7 +4,7 @@ authors:
 - family-names: "Hwang"
   given-names: "Alyssa"
   orcid: "https://orcid.org/0009-0006-4827-8505"
-title: "mturk-templates"
+title: "MTurk Templates for Complex Human Evaluation Tasks"
 version: 1.0.0
 date-released: 2023-06-23
 url: "https://github.com/ahwang16/mturk-templates"
